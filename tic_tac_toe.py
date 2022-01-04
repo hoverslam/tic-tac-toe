@@ -57,8 +57,8 @@ class Game:
         return winner
 
     def karen_ai(self, positions):
-        choice = random.choice(positions) 
-        return choice
+        action = random.choice(positions) 
+        return action
     
     def play_round(self, player, action):
         self.b.update_state(player, action)
@@ -70,6 +70,7 @@ class Game:
 
     def play_game(self):      
         actions = self.b.available_postions()
+        ai = random.choice(["X", "O"])
         current_player = "X"    
         done = False
         i = 1
@@ -78,9 +79,9 @@ class Game:
         
         while done == False:
             print("### ROUND {}: Player '{}' ###".format(i, current_player))
-            if self.players == "Karen" and current_player == "O":
+            if self.players == "Karen" and current_player == ai:
                 action = self.karen_ai(actions)
-            elif self.players == "God" and current_player == "O":
+            elif self.players == "God" and current_player == ai:
                 pass
             elif self.players == "Training":
                 action = self.karen_ai(actions)
