@@ -8,5 +8,5 @@ An implementation of the simple game "Tic-Tac-Toe" that further can be used to t
 
 ## How To
 * Run play.py
-* Select from the available options/positions and press enter. Currently there are no checks on user inputs.
+* The playing board corresponds to the numpad. For example, to place your symbol ("X" or "O") in the middle press 5, bottom left press 1, top left press 7, etc.
 

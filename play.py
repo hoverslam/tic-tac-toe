@@ -1,8 +1,8 @@
 from tic_tac_toe import Game
 
 def main():
-    g = Game("Karen")
-    g.play_game()
+    g = Game()
+    g.play_ai("Karen")
     print("")
     input("Press ENTER to exit.")
        

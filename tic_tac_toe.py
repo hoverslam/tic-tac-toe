@@ -6,23 +6,27 @@ class Board:
     """ The board on which the game is played. """
     
     def __init__(self):
-        self.state = [7, 8, 9, 4, 5, 6, 1, 2, 3]
+        self.state = ["-", "-", "-", "-", "-", "-", "-", "-", "-"]
         
     def available_postions(self):
         p = []
         for k, v in enumerate(self.state):
-            if isinstance(v, int) : p.append(k)            
+            if v == "-": 
+                p.append(k)            
         return p
     
-    def update_state(self, player, position):
-        self.state[position] = player
+    def update(self, action, player):        
+        self.state[action] = player
         
     def colored_players(self):
         colors = self.state.copy()
         for k, v in enumerate(self.state):
-            if v == "X" : colors[k] = "green"
-            elif v == "O" : colors[k] = "red"
-            else : colors[k] = "white"
+            if v == "X": 
+                colors[k] = "green"
+            elif v == "O": 
+                colors[k] = "red"
+            else: 
+                colors[k] = "white"
             
         return colors            
     
@@ -41,41 +45,37 @@ class Board:
 class Game:
     """ The logic to play the game. """
     
-    def __init__(self, players, render=True):
+    def __init__(self):
         self.b = Board()
-        self.players = players
-        self.render = render
+        self.round = 0
+        init()  # use colorama to make termcolor work on Windows too
 
-    def check_winner(self):
-        winner = False
-        # check rows
-        if self.b.state[0] == self.b.state[1] == self.b.state[2] and self.b.state[0] != "-":
-            winner = self.b.state[0]
+    def winner(self):
+        results = False
+        # Check for draw
+        if len(self.b.available_postions()) == 0:
+            results = "Draw"
+        # Check rows
+        elif self.b.state[0] == self.b.state[1] == self.b.state[2] and self.b.state[0] != "-":
+            results = self.b.state[0]
         elif self.b.state[3] == self.b.state[4] == self.b.state[5] and self.b.state[3] != "-":
-            winner = self.b.state[3]
+            results = self.b.state[3]
         elif self.b.state[6] == self.b.state[7] == self.b.state[8] and self.b.state[6] != "-":
-            winner = self.b.state[6]
-        # check columns
+            results = self.b.state[6]
+        # Check columns
         elif self.b.state[0] == self.b.state[3] == self.b.state[6] and self.b.state[0] != "-":
-            winner = self.b.state[0]
+            results = self.b.state[0]
         elif self.b.state[1] == self.b.state[4] == self.b.state[7] and self.b.state[1] != "-":
-            winner = self.b.state[1]
+            results = self.b.state[1]
         elif self.b.state[2] == self.b.state[5] == self.b.state[8] and self.b.state[2] != "-":
-            winner = self.b.state[2]
-        # check diagonals
+            results = self.b.state[2]
+        # Check diagonals
         elif self.b.state[0] == self.b.state[4] == self.b.state[8] and self.b.state[0] != "-":
-            winner = self.b.state[0]
+            results = self.b.state[0]
         elif self.b.state[2] == self.b.state[4] == self.b.state[6] and self.b.state[2] != "-":
-            winner = self.b.state[2]
-        # check for draw
-        elif len(self.b.available_postions()) == 0:
-            winner = "Draw"       
-        
-        return winner
+            results = self.b.state[2]
 
-    def karen_ai(self, positions):
-        action = random.choice(positions) 
-        return action
+        return results
     
     def convert_input(self, input):
         action = None        
@@ -89,58 +89,74 @@ class Game:
         elif input == 2 : action = 7
         elif input == 3 : action = 8
         
-        return action
-            
+        return action         
     
-    def play_round(self, player, action):
-        self.b.update_state(player, action)
+    def step(self, action, player):
+        self.b.update(action, player)
+        self.round = self.round + 1
         actions = self.b.available_postions()
         state = self.b.state
-        done = self.check_winner()
+        done = self.winner()
         
-        return (state, actions, done) 
+        return (state, actions, done)
+    
+    def current_player(self):
+        if self.round % 2 == 0:
+            return ("X", "green")
+        else:
+            return ("O", "red") 
 
-    def play_game(self):
-        init()  # use colorama to make termcolor work on Windows too     
-        actions = self.b.available_postions()        
-        ai = random.choice(["X", "O"])
-        current_player = "X" 
+    def play_human(self):     
+        actions = self.b.available_postions() 
         done = False
-        i = 1
         
         while done == False:
-            if self.render:
-                print("") 
-                print("### ROUND {}: Player '{}' ###".format(i, current_player))
-                self.b.show_board() 
-            if self.players == "Karen" and current_player == ai:
-                action = self.karen_ai(actions)
-            elif self.players == "God" and current_player == ai:
+            player = self.current_player()
+            print("") 
+            print("### ROUND {}: Player '{}' ###".format(self.round, colored(player[0], player[1])))
+            self.b.show_board() 
+            action = int(input("Select position: "))
+            action = self.convert_input(action)
+            
+            state, actions, done = self.step(action, player[0])
+            
+        self.show_results(done)
+
+    def play_ai(self, mode):
+        actions = self.b.available_postions() 
+        done = False
+        ai = random.choice(["X", "O"])
+        
+        while done == False:
+            player = self.current_player()
+            print("") 
+            print("### ROUND {}: Player '{}' ###".format(self.round, colored(player[0], player[1])))
+            self.b.show_board() 
+            if ai == player[0] and mode == "Karen":
+                action = random.choice(actions)
+            elif ai == player[0] and mode == "God":
                 pass
-            elif self.players == "Training":
-                action = self.karen_ai(actions)
-            else:
+            else: 
                 action = int(input("Select position: "))
                 action = self.convert_input(action)
             
-            state, actions, done = self.play_round(current_player, action)      
+            state, actions, done = self.step(action, player[0])
             
-            i = i + 1 
-            if current_player == "X": 
-                current_player = "O"
-            else:
-                current_player = "X" 
-        
-        if self.render:
-            print("")           
-            if done == "Draw":
-                print("###################")    
-                print("!!! IT'S A DRAW !!!")
-                print("###################")
-            else:               
-                print("############################")    
-                print("!!! WINNER IS PLAYER '{}' !!!".format(done))
-                print("############################")
-                
-            print("")   
-            self.b.show_board()
+        self.show_results(done)
+    
+    def training(self):
+        pass
+
+    def show_results(self, result):
+        print("")           
+        if result == "Draw":
+            print("###################")    
+            print("!!! IT'S A DRAW !!!")
+            print("###################")
+        else:               
+            print("############################")    
+            print("!!! WINNER IS PLAYER '{}' !!!".format(result))
+            print("############################")
+            
+        print("")   
+        self.b.show_board()        
