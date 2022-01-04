@@ -109,8 +109,10 @@ class Game:
         i = 1
         
         while done == False:
-            print("### ROUND {}: Player '{}' ###".format(i, current_player))
-            self.b.show_board() 
+            if self.render:
+                print("") 
+                print("### ROUND {}: Player '{}' ###".format(i, current_player))
+                self.b.show_board() 
             if self.players == "Karen" and current_player == ai:
                 action = self.karen_ai(actions)
             elif self.players == "God" and current_player == ai:
@@ -121,23 +123,24 @@ class Game:
                 action = int(input("Select position: "))
                 action = self.convert_input(action)
             
-            state, actions, done = self.play_round(current_player, action)
-            print("")      
+            state, actions, done = self.play_round(current_player, action)      
             
             i = i + 1 
             if current_player == "X": 
                 current_player = "O"
             else:
                 current_player = "X" 
-             
-        self.b.show_board()
-        print("")  
         
-        if done == "Draw":
-            print("###################")    
-            print("!!! IT'S A DRAW !!!")
-            print("###################")
-        else:               
-            print("############################")    
-            print("!!! WINNER IS PLAYER '{}' !!!".format(done))
-            print("############################")
+        if self.render:
+            print("")           
+            if done == "Draw":
+                print("###################")    
+                print("!!! IT'S A DRAW !!!")
+                print("###################")
+            else:               
+                print("############################")    
+                print("!!! WINNER IS PLAYER '{}' !!!".format(done))
+                print("############################")
+                
+            print("")   
+            self.b.show_board()
