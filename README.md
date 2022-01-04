@@ -1,5 +1,5 @@
 # Tic-Tac-Toe
-An implementation of the simple game "Tic-Tac-Toe" that further can be used to train an RL agent. At the moment it has an "AI" player that choose actions randomly.
+An implementation of the simple game "Tic-Tac-Toe" that further can be used to train an RL agent. At the moment it has an "AI" called Karen that choose actions randomly.
 
 ## How To
 * Run play.py
