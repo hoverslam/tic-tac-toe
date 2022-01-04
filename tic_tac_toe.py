@@ -108,8 +108,6 @@ class Game:
         done = False
         i = 1
         
-        # [TODO] check user input
-        
         while done == False:
             print("### ROUND {}: Player '{}' ###".format(i, current_player))
             self.b.show_board() 
@@ -143,5 +141,3 @@ class Game:
             print("############################")    
             print("!!! WINNER IS PLAYER '{}' !!!".format(done))
             print("############################")
-  
-    # [TODO] pygame GUI (maybe) 
