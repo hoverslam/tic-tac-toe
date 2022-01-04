@@ -125,16 +125,15 @@ class Game:
     def play_ai(self, mode):
         actions = self.b.available_postions() 
         done = False
-        ai = random.choice(["X", "O"])
         
         while done == False:
             player = self.current_player()
             print("") 
             print("### ROUND {}: Player '{}' ###".format(self.round, colored(player[0], player[1])))
             self.b.show_board() 
-            if ai == player[0] and mode == "Karen":
+            if player[0] == "O" and mode == "Karen":
                 action = random.choice(actions)
-            elif ai == player[0] and mode == "God":
+            elif player[0] == "O" and mode == "God":
                 pass
             else: 
                 action = int(input("Select position: "))
