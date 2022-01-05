@@ -119,7 +119,7 @@ class Game:
             print(" ###########################")
             
         self.b.show()
-        
+               
     def check_user_input(self, input):
         """ Checks if the user inputs are feasible and converts numpad inputs to the state indices """
         action = None        
@@ -156,6 +156,7 @@ class Game:
         """ Play a game against an AI player. The beginner is selected randomly. """     
         actions = self.b.available_positions() 
         done = -1
+        ai = Karen()
         ai_player = random.choice([1, 2])
         
         while done == -1:
@@ -164,8 +165,8 @@ class Game:
             print(" ### ROUND {}: Player -{}- ###".format(self.round, player[1]))
             self.b.show()
             if player[0] == ai_player:
-                action = random.choice(actions)
-                print("  'Karen' selects an action randomly.")
+                action = ai.select_action(actions)
+                print("  Select position: '{}' selects an action randomly.".format(ai.get_name()))
             else: 
                 action = int(input("  Select position: "))
                 action = self.check_user_input(action)
@@ -173,3 +174,14 @@ class Game:
             state, actions, done = self.step(action, player[0])
             
         self.show_results(done)
+        
+class Karen:
+    """ A simple 'AI' that selects actions randomly. """
+    def __init__(self):
+        self.name = "Karen"
+        
+    def select_action(self, actions):        
+        return random.choice(actions)
+    
+    def get_name(self):
+        return self.name

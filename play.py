@@ -2,7 +2,7 @@ from tic_tac_toe import Game
 
 def main():
     g = Game()
-    g.play_human()
+    g.play_ai()
     input("Press any key to exit.")
 
 
