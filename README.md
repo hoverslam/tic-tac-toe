@@ -1,5 +1,5 @@
 # Tic-Tac-Toe
-An implementation of the simple game "Tic-Tac-Toe". Currently you can play against another human or "Karen" who chooses actions randomly.
+An implementation of the simple game "Tic-Tac-Toe". Currently you can play against another human an "AI" that chooses actions randomly and an agent that was trained via Q-learning.
 
 ## Prerequisits
 * Python v3.10.1

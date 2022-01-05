@@ -1,4 +1,4 @@
-import random
+import random, itertools, pickle
 
 class Board:
     def __init__(self):
@@ -60,7 +60,7 @@ class Game:
         
         return (state, actions, done)
     
-    def current_player(self):
+    def current_turn(self):
         """ Player 1 moves on uneven rounds and player 2 on even. """
         if self.round % 2 == 0:
             return (2, "O", "red")
@@ -99,11 +99,11 @@ class Game:
     def get_rewards(self, done):
         """ Returns the rewards for both players. """
         if done == 1:
-            rewards = (1, -1)
+            rewards = (1, 0)
         elif done == 2:
-            rewards = (-1, 1)
+            rewards = (0, 1)
         else:
-            rewards = (0, 0)
+            rewards = (0.5, 0.5)
             
         return rewards
     
@@ -135,85 +135,164 @@ class Game:
         
         return action
     
-    def play_human(self):
-        """ Play a game against another human player. """     
-        actions = self.b.available_positions() 
+    def play_human(self, mode):
+        """ Human plays against another human or an AI. modes: pvp, random, q-learning """     
+        actions = self.b.available_positions()
+        state = self.b.get_state() 
         done = -1
+        ai_turn = random.choice([1, 2])
+        
+        if mode == "pvp":
+            ai = False
+        elif mode == "random":
+            ai = RandomPlayer()
+        elif mode == "q-learning":
+            ai = QPlayer(0, 0, 0)
+            ai.load_table()   
         
         while done == -1:
-            player = self.current_player()
+            turn = self.current_turn()
             print("") 
-            print(" ### ROUND {}: Player -{}- ###".format(self.round, player[1]))
-            self.b.show() 
-            action = int(input("  Select position: "))
-            action = self.check_user_input(action)
-            
-            state, actions, done = self.step(action, player[0])
-            
-        self.show_results(done)
-        
-    def play_ai(self):
-        """ Play a game against an AI player. The beginner is selected randomly. """     
-        actions = self.b.available_positions() 
-        done = -1
-        ai = Karen()
-        ai_player = random.choice([1, 2])
-        
-        while done == -1:
-            player = self.current_player()            
-            print("") 
-            print(" ### ROUND {}: Player -{}- ###".format(self.round, player[1]))
+            print(" ### ROUND {}: Player -{}- ###".format(self.round, turn[1]))
             self.b.show()
-            if player[0] == ai_player:
-                action = ai.select_action(actions)
-                print("  Select position: '{}' selects an action randomly.".format(ai.get_name()))
+            if ai != False and turn[0] == ai_turn:
+                action = ai.select_action(actions, state)
+                print("  Select position: AI -> {}".format(action))
             else: 
                 action = int(input("  Select position: "))
                 action = self.check_user_input(action)
             
-            state, actions, done = self.step(action, player[0])
+            state, actions, done = self.step(action, turn[0])
             
         self.show_results(done)
         
-    def play_training(self, p1, p2, games):
-        """ Let two AI players play against each other to train them. """        
-        stats = [] 
-        
-        for g in range(games):    
+    def play_ai(self, p1, p2, games):
+        """ Two AIs play against each other for experiment purposes. """
+        stats = []
+              
+        for g in range(games):      
             actions = self.b.available_positions()
-            done = -1 
+            state = self.b.get_state()
+            done = -1
 
             print("Game: {}/{}".format(g+1, games))            
             while done == -1:
-                player = self.current_player()            
-                if player[0] == 1:
-                    action = p1.select_action(actions)                    
+                turn = self.current_turn()            
+                if turn[0] == 1:
+                    action = p1.select_action(actions, state)                  
                 else: 
-                    action = p2.select_action(actions)
+                    action = p2.select_action(actions, state)
                 
-                state, actions, done = self.step(action, player[0])
-               
-            stats.append(done)  
+                state, actions, done = self.step(action, turn[0])                   
+
+            stats.append(done)
+            self.b = Board()
+            self.round = 1
+
+        print("")
+        print("Player -1-: {}".format(stats.count(1) / games))
+        print("Player -2-: {}".format(stats.count(2) / games))
+        print("Draws: {}".format(stats.count(0) / games))
+        print("")
+
+    def train_ai(self, p1, p2, games):
+        """ Two AIs play against each other to train them. The first AI gets saved so 
+        you can play against it. """
+         
+        for g in range(games):
+            p1_history = []       
+            p2_history = []       
+            actions = self.b.available_positions()
+            state = self.b.get_state()
+            ai_turn = random.choice([1, 2])
+            done = -1
+
+            print("Game: {}/{}".format(g+1, games))            
+            while done == -1:
+                turn = self.current_turn()            
+                if turn[0] == ai_turn:
+                    action = p1.select_action(actions, state)
+                    p1_history.append([state[:], action])                    
+                else: 
+                    action = p2.select_action(actions, state)
+                    p2_history.append([state[:], action]) 
+                
+                state, actions, done = self.step(action, turn[0])                   
+            
+            p1_reward = self.get_rewards(done)[0]
+            p1.update_table(p1_history, p1_reward)
+            p2_reward = self.get_rewards(done)[1]
+            p2.update_table(p2_history, p2_reward)
+
             self.b = Board()
             self.round = 1
         
-        p1_wins = stats.count(1)
-        p2_wins = stats.count(2)
-        draws = stats.count(0)
-        
-        print("")   
-        print("Player 1: {}".format(p1_wins/len(stats)))
-        print("Player 2: {}".format(p2_wins/len(stats)))
-        print("Draws: {}".format(draws/len(stats)))
-        print("") 
+        p1.save_table()
+        print("Training DONE!")
+        print(list(p1.table.values())[1200:1220])
               
-class Karen:
+class RandomPlayer:
     """ A simple 'AI' that selects actions randomly. """
     def __init__(self):
-        self.name = "Karen"
+        pass
         
-    def select_action(self, actions):        
+    def select_action(self, actions, state):        
         return random.choice(actions)
+
+    def update_table(self, history, reward):
+        pass
     
-    def get_name(self):
-        return self.name
+class QPlayer:
+    """ A RL agent that utilizes Q-learning. """
+    def __init__(self, learning_rate, discount, epsilon):
+        self.table = self.create_table()
+        self.learning_rate = learning_rate
+        self.discount = discount
+        self.epsilon = epsilon
+        
+    def create_table(self):
+        table = {}
+        keys = list(itertools.product([0, 1, 2], repeat = 9))
+        for k in keys:
+            table[k] = [0 for x in range(9)]
+            
+        return table
+            
+    def load_table(self):
+        with open('table.pickle', 'rb') as handle:
+            self.table = pickle.load(handle)            
+    
+    def save_table(self):
+        with open('table.pickle', 'wb') as handle:
+            pickle.dump(self.table, handle)
+
+    def update_table(self, history, reward):
+        history.reverse()
+        
+        for i, (state, action) in enumerate(history):
+            if i == 0:
+                self.table[tuple(state)][action] = reward
+            else:
+                future_index = i - 1
+                future_state = history[future_index][0]
+                future_max_q = self.find_max_q(future_state)[0]
+                current_q = self.table[tuple(state)][action]
+                new_q = (1 - self.learning_rate) * current_q + self.learning_rate * self.discount * future_max_q
+                self.table[tuple(state)][action] = new_q
+
+    def find_max_q(self, state):
+        actions = self.table[tuple(state)]
+        action = 0
+        max_q = -10e10
+        for i, q in enumerate(actions):
+            if q > max_q and state[i] == 0:
+                max_q = q
+                action = i
+            
+        return (max_q, action)
+
+    def select_action(self, actions, state):          
+        if random.random() < self.epsilon:
+            return random.choice(actions)
+        else:
+            return self.find_max_q(state)[1] 
