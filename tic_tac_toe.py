@@ -175,6 +175,38 @@ class Game:
             
         self.show_results(done)
         
+    def play_training(self, p1, p2, games):
+        """ Let two AI players play against each other to train them. """        
+        stats = [] 
+        
+        for g in range(games):    
+            actions = self.b.available_positions()
+            done = -1 
+
+            print("Game: {}/{}".format(g+1, games))            
+            while done == -1:
+                player = self.current_player()            
+                if player[0] == 1:
+                    action = p1.select_action(actions)                    
+                else: 
+                    action = p2.select_action(actions)
+                
+                state, actions, done = self.step(action, player[0])
+               
+            stats.append(done)  
+            self.b = Board()
+            self.round = 1
+        
+        p1_wins = stats.count(1)
+        p2_wins = stats.count(2)
+        draws = stats.count(0)
+        
+        print("")   
+        print("Player 1: {}".format(p1_wins/len(stats)))
+        print("Player 2: {}".format(p2_wins/len(stats)))
+        print("Draws: {}".format(draws/len(stats)))
+        print("") 
+              
 class Karen:
     """ A simple 'AI' that selects actions randomly. """
     def __init__(self):

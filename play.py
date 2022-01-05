@@ -1,9 +1,10 @@
-from tic_tac_toe import Game
+from tic_tac_toe import Game, Karen
 
 def main():
     g = Game()
-    g.play_ai()
-    input("Press any key to exit.")
+    p1 = Karen()
+    p2 = Karen()
+    g.train_ai(p1, p2, 100000)
 
 
 if __name__ == "__main__":
