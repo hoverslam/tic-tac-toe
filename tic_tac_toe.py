@@ -204,7 +204,7 @@ class Game:
         print("Draws: {}".format(stats.count(0) / games))
         print("")
 
-    def train_ai(self, p1, p2, games, filename="table", player=1):
+    def train_ai(self, p1, p2, games, filename, player):
         """ Two AIs play against each other to train them. """
          
         for g in tqdm(range(games)):
