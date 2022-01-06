@@ -1,6 +1,8 @@
 # Tic-Tac-Toe
 An implementation of the simple game "Tic-Tac-Toe". Currently you can play against another human, an "AI" that selects random positions or an Q-learning agent that was trained on 1 million games.
 
+<https://en.wikipedia.org/wiki/Tic-tac-toe>
+
 ## Prerequisits
 * Python v3.10.1
 * Tqdm v4.62.3
