@@ -1,6 +1,10 @@
 from tic_tac_toe import Game, RandomPlayer, QPlayer
+import typer
 
-def training(games=1000000):
+app = typer.Typer()
+
+@app.command()
+def training(games:int):
     g = Game()
         
     print("### Training as Player 1 ###")
@@ -17,8 +21,10 @@ def training(games=1000000):
     
     input("Press any key to exit")
 
-def results(games=10000):
+@app.command()
+def results():
     g = Game()
+    games = 10000
     
     print("### QPlayer vs. RandomPlayer ###") 
     p1 = QPlayer(0, 0, 0)
@@ -40,22 +46,13 @@ def results(games=10000):
     g.play_ai(p1, p2, games)
     
     input("Press any key to exit")
-    
-def play_game(mode):
+
+@app.command()    
+def play(mode:str):
     g = Game()
 
     g.play_human(mode)
     input("Press any key to exit")  
 
-def main():
-    #training()
-    #results()
-    play_game("q-learning")
-    
-    # INTERESTING FINDINGS #
-    # - One must train the agent as player 1 and player 2, there is no one fits them all
-    # - If the rewards (win, draw, loss) are 1, 0.5, 0 then in a QPlayer vs. QPlayer scenario there are inconsistent results. Sometimes always Player 1 or Player 2 wins and sometimes there are always draws. 
-    #   If the rewards (win, draw, loss) are 1, 1, 0 then in a QPlayer vs. QPlayer game there are 100% draws
-
 if __name__ == "__main__":
-    main()
+    app()

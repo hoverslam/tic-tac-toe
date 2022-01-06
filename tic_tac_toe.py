@@ -137,7 +137,7 @@ class Game:
         return action
     
     def play_human(self, mode):
-        """ Human plays against another human or an AI. modes: pvp, random, q-learning """     
+        """ Human plays against another human or an AI. Modes: pvp, random, q-learning """     
         actions = self.b.available_positions()
         state = self.b.get_state() 
         done = -1
