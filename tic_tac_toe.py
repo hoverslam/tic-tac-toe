@@ -1,4 +1,5 @@
 import random, itertools, pickle
+from tqdm import tqdm
 
 class Board:
     def __init__(self):
@@ -103,25 +104,25 @@ class Game:
         elif done == 2:
             rewards = (0, 1)
         else:
-            rewards = (0.5, 0.5)
+            rewards = (1, 1)
             
         return rewards
     
     def show_results(self, result):
         print("")           
         if result == 0:
-            print(" #######################")    
-            print("   !!! IT'S A DRAW !!!")
-            print(" #######################")
+            print("#######################")    
+            print("  !!! IT'S A DRAW !!!")
+            print("#######################")
         else:             
-            print(" ###########################")    
-            print("   !!! PLAYER -{}- WINS !!!".format(result))
-            print(" ###########################")
+            print("###########################")    
+            print("  !!! PLAYER -{}- WINS !!!".format(result))
+            print("###########################")
             
         self.b.show()
                
     def check_user_input(self, input):
-        """ Checks if the user inputs are feasible and converts numpad inputs to the state indices """
+        """ Check if the user inputs are feasible and convert numpad inputs to the state indices """
         action = None        
         if input == 7 : action = 0
         elif input == 8 : action = 1
@@ -145,18 +146,27 @@ class Game:
         if mode == "pvp":
             ai = False
         elif mode == "random":
-            ai = RandomPlayer()
+            ai = True
+            ai1 = RandomPlayer()
+            ai2 = RandomPlayer()
         elif mode == "q-learning":
-            ai = QPlayer(0, 0, 0)
-            ai.load_table()   
+            ai = True
+            ai1 = QPlayer(0, 0, 0)
+            ai1.load_table("p1")
+            ai2 = QPlayer(0, 0, 0)
+            ai2.load_table("p2")     
         
         while done == -1:
             turn = self.current_turn()
             print("") 
-            print(" ### ROUND {}: Player -{}- ###".format(self.round, turn[1]))
+            print("### ROUND {}: Player -{}- ###".format(self.round, turn[1]))
             self.b.show()
-            if ai != False and turn[0] == ai_turn:
-                action = ai.select_action(actions, state)
+            if ai and turn[0] == ai_turn:
+                if turn[0] == 1:
+                    action = ai1.select_action(actions, state)
+                else:
+                    action = ai2.select_action(actions, state)
+                
                 print("  Select position: AI -> {}".format(action))
             else: 
                 action = int(input("  Select position: "))
@@ -170,12 +180,11 @@ class Game:
         """ Two AIs play against each other for experiment purposes. """
         stats = []
               
-        for g in range(games):      
+        for g in tqdm(range(games)):      
             actions = self.b.available_positions()
             state = self.b.get_state()
             done = -1
-
-            print("Game: {}/{}".format(g+1, games))            
+           
             while done == -1:
                 turn = self.current_turn()            
                 if turn[0] == 1:
@@ -190,27 +199,24 @@ class Game:
             self.round = 1
 
         print("")
-        print("Player -1-: {}".format(stats.count(1) / games))
-        print("Player -2-: {}".format(stats.count(2) / games))
+        print("Player 1: {}".format(stats.count(1) / games))
+        print("Player 2: {}".format(stats.count(2) / games))
         print("Draws: {}".format(stats.count(0) / games))
         print("")
 
-    def train_ai(self, p1, p2, games):
-        """ Two AIs play against each other to train them. The first AI gets saved so 
-        you can play against it. """
+    def train_ai(self, p1, p2, games, filename="table", player=1):
+        """ Two AIs play against each other to train them. """
          
-        for g in range(games):
+        for g in tqdm(range(games)):
             p1_history = []       
             p2_history = []       
             actions = self.b.available_positions()
             state = self.b.get_state()
-            ai_turn = random.choice([1, 2])
             done = -1
-
-            print("Game: {}/{}".format(g+1, games))            
+           
             while done == -1:
-                turn = self.current_turn()            
-                if turn[0] == ai_turn:
+                turn = self.current_turn()  
+                if turn[0] == 1:
                     action = p1.select_action(actions, state)
                     p1_history.append([state[:], action])                    
                 else: 
@@ -227,9 +233,10 @@ class Game:
             self.b = Board()
             self.round = 1
         
-        p1.save_table()
-        print("Training DONE!")
-        print(list(p1.table.values())[1200:1220])
+        if player == 1:
+            p1.save_table(filename)
+        elif player == 2:
+            p2.save_table(filename)
               
 class RandomPlayer:
     """ A simple 'AI' that selects actions randomly. """
@@ -258,12 +265,12 @@ class QPlayer:
             
         return table
             
-    def load_table(self):
-        with open('table.pickle', 'rb') as handle:
+    def load_table(self, filename):
+        with open("{}.pickle".format(filename), "rb") as handle:
             self.table = pickle.load(handle)            
     
-    def save_table(self):
-        with open('table.pickle', 'wb') as handle:
+    def save_table(self, filename):
+        with open("{}.pickle".format(filename), "wb") as handle:
             pickle.dump(self.table, handle)
 
     def update_table(self, history, reward):
