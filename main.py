@@ -8,14 +8,14 @@ def training(games:int):
     g = Game()
         
     print("### Training as Player 1 ###")
-    p1 = QPlayer(0.8, 0.9, 0.1)
+    p1 = QPlayer(0.2, 0.95, 0.05)
     p2 = RandomPlayer()
     g.train_ai(p1, p2, games, "p1", 1)
     print("")    
     
     print("### Training as Player 2 ###")
     p1 = RandomPlayer()
-    p2 = QPlayer(0.8, 0.9, 0.1)
+    p2 = QPlayer(0.2, 0.95, 0.05)
     g.train_ai(p1, p2, games, "p2", 2)
     print("")
     
