@@ -24,7 +24,7 @@ def training(games:int):
 @app.command()
 def results():
     g = Game()
-    games = 100000
+    games = 10000
     
     print("### QPlayer vs. RandomPlayer ###") 
     p1 = QPlayer(0, 0, 0)
