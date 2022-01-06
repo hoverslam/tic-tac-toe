@@ -274,6 +274,7 @@ class QPlayer:
             pickle.dump(self.table, handle)
 
     def update_table(self, history, reward):
+        """ Sutton (2020) Reinforcement Learning, Chapter 6.5: Q-learning """
         history.reverse()
         
         for i, (state, action) in enumerate(history):
