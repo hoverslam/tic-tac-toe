@@ -17,4 +17,4 @@ The playing board corresponds to a numpad. For example, to place your symbol ("X
 
 `main.py train [n]` &nbsp;&nbsp;&nbsp;&nbsp; to train the AI again with [n] being the number of games it plays
 
-`main.py results` &nbsp;&nbsp;&nbsp;&nbsp; to see how well the AI performs in 10000 games
+`main.py results` &nbsp;&nbsp;&nbsp;&nbsp; to see how well the AI performs in 100000 games

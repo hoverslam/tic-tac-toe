@@ -24,7 +24,7 @@ def training(games:int):
 @app.command()
 def results():
     g = Game()
-    games = 10000
+    games = 100000
     
     print("### QPlayer vs. RandomPlayer ###") 
     p1 = QPlayer(0, 0, 0)
@@ -43,6 +43,11 @@ def results():
     p1.load_table("p1")
     p2 = QPlayer(0, 0, 0)
     p2.load_table("p2")
+    g.play_ai(p1, p2, games)
+    
+    print("### RandomPlayer vs. RandomPlayer ###")
+    p1 = RandomPlayer()
+    p2 = RandomPlayer()
     g.play_ai(p1, p2, games)
     
     input("Press any key to exit")
