@@ -14,9 +14,8 @@ def training(games:int):
     input("Press any key to exit")
 
 @app.command()
-def results():
+def results(games:int):
     g = Game()
-    games = 10000
     
     print("### QPlayer vs. RandomPlayer ###") 
     p1 = QPlayer()
