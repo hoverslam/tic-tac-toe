@@ -177,11 +177,11 @@ class Game:
             
         self.show_results(done)
         
-    def play_ai(self, p1, p2, games):
+    def play_ai(self, p1, p2, games, render=True):
         """ Two AIs play against each other for experiment purposes. """
         stats = []
               
-        for g in tqdm(range(games)):      
+        for g in tqdm(range(games), disable=not render):      
             actions = self.b.available_positions()
             state = self.b.get_state()
             done = -1
@@ -201,14 +201,14 @@ class Game:
 
         return stats
 
-    def train_ai(self, games):
+    def train_ai(self, games, render=True):
         """ Two AIs play against each other to train them. """
         p1 = QPlayer(0.95, 0.2, [1.0, 0.01, 0.5])
         p1_epsilons = p1.decay_schedule(games)
         p2 = QPlayer(0.95, 0.2, [1.0, 0.01, 0.5])
         p2_epsilons = p2.decay_schedule(games)
         
-        for g in tqdm(range(games)):
+        for g in tqdm(range(games), disable=not render):
             p1_history = []       
             p2_history = []       
             actions = self.b.available_positions()
