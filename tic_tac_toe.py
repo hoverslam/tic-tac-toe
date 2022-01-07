@@ -105,7 +105,7 @@ class Game:
         elif done == 2:
             rewards = (0, 1)
         else:
-            rewards = (1, 1)
+            rewards = (0.5, 0.5)
             
         return rewards
     
