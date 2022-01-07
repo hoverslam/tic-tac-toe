@@ -5,6 +5,7 @@ An implementation of the simple game "Tic-Tac-Toe". Currently you can play again
 
 ## Prerequisits
 * Python v3.10.1
+* Numpy v1.22.0
 * Tqdm v4.62.3
 * Typer v0.4.0
 

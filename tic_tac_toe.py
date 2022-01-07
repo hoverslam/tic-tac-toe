@@ -1,5 +1,6 @@
 import random, itertools, pickle
 from tqdm import tqdm
+import numpy as np
 
 class Board:
     def __init__(self):
@@ -163,9 +164,9 @@ class Game:
             self.b.show()
             if ai and turn[0] == ai_turn:
                 if turn[0] == 1:
-                    action = ai1.select_action(actions, state)
+                    action = ai1.select_action(actions, state, 0)
                 else:
-                    action = ai2.select_action(actions, state)
+                    action = ai2.select_action(actions, state, 0)
                 
                 print("  Select position: AI -> {}".format(action))
             else: 
@@ -188,9 +189,9 @@ class Game:
             while done == -1:
                 turn = self.current_turn()            
                 if turn[0] == 1:
-                    action = p1.select_action(actions, state)                  
+                    action = p1.select_action(actions, state, 0)                  
                 else: 
-                    action = p2.select_action(actions, state)
+                    action = p2.select_action(actions, state, 0)
                 
                 state, actions, done = self.step(action, turn[0])                   
 
@@ -204,9 +205,13 @@ class Game:
         print("Draws: {}".format(stats.count(0) / games))
         print("")
 
-    def train_ai(self, p1, p2, games, filename, player):
+    def train_ai(self, games):
         """ Two AIs play against each other to train them. """
-         
+        p1 = QPlayer(0.95, 0.2, [1.0, 0.01, 0.5])
+        p1_epsilons = p1.decay_schedule(games)
+        p2 = QPlayer(0.95, 0.2, [1.0, 0.01, 0.5])
+        p2_epsilons = p2.decay_schedule(games)
+        
         for g in tqdm(range(games)):
             p1_history = []       
             p2_history = []       
@@ -217,10 +222,10 @@ class Game:
             while done == -1:
                 turn = self.current_turn()  
                 if turn[0] == 1:
-                    action = p1.select_action(actions, state)
+                    action = p1.select_action(actions, state, p1_epsilons[g])
                     p1_history.append([state[:], action])                    
                 else: 
-                    action = p2.select_action(actions, state)
+                    action = p2.select_action(actions, state, p2_epsilons[g])
                     p2_history.append([state[:], action]) 
                 
                 state, actions, done = self.step(action, turn[0])                   
@@ -233,17 +238,15 @@ class Game:
             self.b = Board()
             self.round = 1
         
-        if player == 1:
-            p1.save_table(filename)
-        elif player == 2:
-            p2.save_table(filename)
+        p1.save_table("p1")
+        p2.save_table("p2")
               
 class RandomPlayer:
     """ A simple 'AI' that selects actions randomly. """
     def __init__(self):
         pass
         
-    def select_action(self, actions, state):        
+    def select_action(self, actions, state, epsilon):        
         return random.choice(actions)
 
     def update_table(self, history, reward):
@@ -251,10 +254,10 @@ class RandomPlayer:
     
 class QPlayer:
     """ A RL agent that utilizes Q-learning. """
-    def __init__(self, learning_rate, discount, epsilon):
+    def __init__(self, discount=None, learning_rate=None, epsilon=None):
         self.table = self.create_table()
-        self.learning_rate = learning_rate
         self.discount = discount
+        self.learning_rate = learning_rate        
         self.epsilon = epsilon
         
     def create_table(self):
@@ -299,8 +302,19 @@ class QPlayer:
             
         return (max_q, action)
 
-    def select_action(self, actions, state):          
-        if random.random() < self.epsilon:
+    def select_action(self, actions, state, epsilon):          
+        if random.random() < epsilon:
             return random.choice(actions)
         else:
             return self.find_max_q(state)[1] 
+        
+    def decay_schedule(self, max_steps, log_start=-2, log_base=10):
+        """ Morales (2020) Grokking Deep Reinforcement Learning """
+        decay_steps = int(max_steps * self.epsilon[2])
+        rem_steps = max_steps - decay_steps
+        values = np.logspace(log_start, 0, decay_steps, base=log_base, endpoint=True)[::-1]
+        values = (values - values.min()) / (values.max() - values.min())
+        values = (self.epsilon[0] - self.epsilon[1]) * values + self.epsilon[1]
+        values = np.pad(values, (0, rem_steps), "edge")
+    
+        return values
