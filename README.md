@@ -14,11 +14,13 @@ Install dependencies with &nbsp;&nbsp;&nbsp;&nbsp; `pip install -r requirements.
 ## How to use
 The playing board corresponds to a numpad. For example, to place your symbol ("X" or "O") in the middle press 5, bottom left press 1, top left press 7, etc.
 
+Go to the game folder and run:
+
 `main.py play pvp` &nbsp;&nbsp;&nbsp;&nbsp; to play another human player
 
 `main.py play random` &nbsp;&nbsp;&nbsp;&nbsp; to play against random actions 
 
-`main.py play q-learning` &nbsp;&nbsp;&nbsp;&nbsp; to play a Q-learning agent
+`main.py play q-learning` &nbsp;&nbsp;&nbsp;&nbsp; to play a Q-learning opponent
 
 `main.py train [n]` &nbsp;&nbsp;&nbsp;&nbsp; to train the AI with [n] being the number of games it plays
 
