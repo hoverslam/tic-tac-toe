@@ -9,8 +9,12 @@ An implementation of the simple game "Tic-Tac-Toe". Currently you can play again
 * Tqdm v4.62.3
 * Typer v0.4.0
 
+Install dependencies with &nbsp;&nbsp;&nbsp;&nbsp; `pip install -r requirements.txt` 
+
 ## How to use
 The playing board corresponds to a numpad. For example, to place your symbol ("X" or "O") in the middle press 5, bottom left press 1, top left press 7, etc.
+
+
 
 `main.py play pvp` &nbsp;&nbsp;&nbsp;&nbsp; to play another human player
 
