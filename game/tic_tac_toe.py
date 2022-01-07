@@ -236,6 +236,8 @@ class Game:
         
         p1.save_table("p1")
         p2.save_table("p2")
+        
+        return (p1, p2)
               
 class RandomPlayer:
     """ A simple 'AI' that selects actions randomly. """
