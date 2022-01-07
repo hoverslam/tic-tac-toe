@@ -17,29 +17,49 @@ def training(games:int):
 def results(games:int):
     g = Game()
     
+    # QPlayer vs. RandomPlayer
     print("### QPlayer vs. RandomPlayer ###") 
     p1 = QPlayer()
     p1.load_table("p1")
     p2 = RandomPlayer()
-    g.play_ai(p1, p2, games)
+    res = g.play_ai(p1, p2, games)    
+    print("Player 1: {}".format(res.count(1) / games))
+    print("Player 2: {}".format(res.count(2) / games))
+    print("Draws:    {}".format(res.count(0) / games))
+    print("")
 
+    # RandomPlayer vs. QPlayer
     print("### RandomPlayer vs. QPlayer ###")
     p1 = RandomPlayer()
     p2 = QPlayer()
     p2.load_table("p2")
-    g.play_ai(p1, p2, games)
-
+    res = g.play_ai(p1, p2, games)    
+    print("Player 1: {}".format(res.count(1) / games))
+    print("Player 2: {}".format(res.count(2) / games))
+    print("Draws:    {}".format(res.count(0) / games))
+    print("")
+    
+    # QPlayer vs. QPlayer
     print("### QPlayer vs. QPlayer ###")
     p1 = QPlayer()
     p1.load_table("p1")
     p2 = QPlayer()
     p2.load_table("p2")
-    g.play_ai(p1, p2, games)
+    res = g.play_ai(p1, p2, games)    
+    print("Player 1: {}".format(res.count(1) / games))
+    print("Player 2: {}".format(res.count(2) / games))
+    print("Draws:    {}".format(res.count(0) / games))
+    print("")
     
+    # RandomPlayer vs. RandomPlayer (Baseline)
     print("### RandomPlayer vs. RandomPlayer ###")
     p1 = RandomPlayer()
     p2 = RandomPlayer()
-    g.play_ai(p1, p2, games)
+    res = g.play_ai(p1, p2, games)    
+    print("Player 1: {}".format(res.count(1) / games))
+    print("Player 2: {}".format(res.count(2) / games))
+    print("Draws:    {}".format(res.count(0) / games))
+    print("")
     
     input("Press any key to exit")
 

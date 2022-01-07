@@ -199,11 +199,7 @@ class Game:
             self.b = Board()
             self.round = 1
 
-        print("")
-        print("Player 1: {}".format(stats.count(1) / games))
-        print("Player 2: {}".format(stats.count(2) / games))
-        print("Draws: {}".format(stats.count(0) / games))
-        print("")
+        return stats
 
     def train_ai(self, games):
         """ Two AIs play against each other to train them. """
