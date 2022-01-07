@@ -14,8 +14,6 @@ Install dependencies with &nbsp;&nbsp;&nbsp;&nbsp; `pip install -r requirements.
 ## How to use
 The playing board corresponds to a numpad. For example, to place your symbol ("X" or "O") in the middle press 5, bottom left press 1, top left press 7, etc.
 
-
-
 `main.py play pvp` &nbsp;&nbsp;&nbsp;&nbsp; to play another human player
 
 `main.py play random` &nbsp;&nbsp;&nbsp;&nbsp; to play against random actions 
