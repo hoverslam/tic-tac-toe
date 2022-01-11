@@ -1,10 +1,11 @@
 from tic_tac_toe import Game, RandomPlayer, QPlayer
+from typing import Optional
 import typer
 
 app = typer.Typer()
 
 @app.command()
-def training(games:int):
+def training(games: int):
     g = Game()
         
     print("### Training ###")
@@ -14,7 +15,7 @@ def training(games:int):
     input("Press any key to exit")
 
 @app.command()
-def results(games:int):
+def results(games: int):
     g = Game()
     
     # QPlayer vs. RandomPlayer
@@ -64,13 +65,13 @@ def results(games:int):
     input("Press any key to exit")
 
 @app.command()    
-def play(mode:str):
+def play(mode: str, gui: Optional[bool] = typer.Argument(False)):
     g = Game()
-
-    g.play_human(mode)
-    input("Press any key to exit")
+    if gui:
+        g.play_human(mode, True)
+    else:
+        g.play_human(mode, False)
+        input("Press any key to exit")
       
 if __name__ == "__main__":
-    #app()
-    g = Game()
-    g.play_gui()
+    app()

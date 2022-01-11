@@ -137,12 +137,13 @@ class Game:
         
         return action
     
-    def play_human(self, mode):
+    def play_human(self, mode, gui=False):
         """ Human plays against another human or an AI. Modes: pvp, random, q-learning """     
         actions = self.b.available_positions()
         state = self.b.get_state() 
         done = -1
-        ai_turn = random.choice([1, 2])
+        ai_turn = random.choice([1, 2])        
+        if gui: gui = GUI()
         
         if mode == "pvp":
             ai = False
@@ -159,32 +160,34 @@ class Game:
         
         while done == -1:
             turn = self.current_turn()
-            print("") 
-            print("### ROUND {}: Player -{}- ###".format(self.round, turn[1]))
-            self.b.show()
+            
+            if not gui:
+                print("") 
+                print("### ROUND {}: Player -{}- ###".format(self.round, turn[1]))
+                self.b.show()
+                
             if ai and turn[0] == ai_turn:
                 if turn[0] == 1:
                     action = ai1.select_action(actions, state, 0)
                 else:
                     action = ai2.select_action(actions, state, 0)
-                
-                print("  Select position: AI -> {}".format(action))
+                state, actions, done = self.step(action, turn[0])                
+                if not gui: print("  Select position: AI -> {}".format(action))
             else: 
-                action = int(input("  Select position: "))
-                action = self.check_user_input(action)
-            
-            state, actions, done = self.step(action, turn[0])
-            
-        self.show_results(done)
-        
-    def play_gui(self):
-        gui = GUI()
-        
-        player = 1
-        
-        while 1:
-            gui.render(self, player)
-        
+                if gui:
+                    action = gui.render(state, actions)
+                    if action is not None:            
+                        state, actions, done = self.step(action, turn[0])
+                else:
+                    action = int(input("  Select position: "))
+                    action = self.check_user_input(action)
+                    state, actions, done = self.step(action, turn[0])
+                    
+        if gui:
+            while 1: gui.show_results(state, done)
+        else:
+            self.show_results(done)           
+                
     def play_ai(self, p1, p2, games, render=True):
         """ Two AIs play against each other for experiment purposes. """
         stats = []
@@ -330,7 +333,7 @@ class GUI:
         # Initialize screen
         pygame.init()
         pygame.display.set_caption("Tic-Tac-Toe")
-        self.screen = pygame.display.set_mode((300, 450))
+        self.screen = pygame.display.set_mode((300, 400))
         
         # Create symbols (X and O)
         self.p1 = pygame.image.load("img/x.png")
@@ -340,37 +343,60 @@ class GUI:
         self.bg_image = pygame.image.load("img/background.png")
         icon = pygame.image.load("img/icon.png")
         pygame.display.set_icon(icon)
-        
-        self.game_history = []
       
-    def render(self, game, player):
+    def render(self, state, actions):
         # Check events    
         for event in pygame.event.get():
             if event.type == pygame.QUIT: sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN: 
                 action = self.position_to_action(pygame.mouse.get_pos())
-                if (action is not None) and ([player, action] not in self.game_history): 
-                    self.game_history.append([player, action])
-                    state, actions, done = game.step(action, player)
-                    return (state, actions, done)
+                if (action is not None) and (action in actions):
+                    return action
         
         # Update screen    
         self.screen.blit(self.bg_image, [0, 0])
-        for player, action in self.game_history:
-            coordinates = self.action_to_position(action)
-            self.screen.blit(self.p1, coordinates)            
-        pygame.display.flip() 
+        for i, player in enumerate(state):
+            coordinates = self.index_to_position(i)
+            if player == 1:
+                self.screen.blit(self.p1, coordinates)
+            elif player == 2:
+                self.screen.blit(self.p2, coordinates)            
+        pygame.display.flip()
         
-    def action_to_position(self, action):                
-        if action == 0: return [0, 0]
-        if action == 1: return [100, 0]
-        if action == 2: return [200, 0]
-        if action == 3: return [0, 100]
-        if action == 4: return [100, 100]
-        if action == 5: return [200, 100]
-        if action == 6: return [0, 200]
-        if action == 7: return [100, 200]
-        if action == 8: return [200, 200]
+    def show_results(self, state, done):
+        # Check events 
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT: sys.exit()
+                
+        # Screen after final move    
+        self.screen.blit(self.bg_image, [0, 0])
+        for i, player in enumerate(state):
+            coordinates = self.index_to_position(i)
+            if player == 1:
+                self.screen.blit(self.p1, coordinates)
+            elif player == 2:
+                self.screen.blit(self.p2, coordinates)
+                
+        # Show outcome
+        if done == 1:
+            result = pygame.image.load("img/win1.png")   
+        elif done == 2:
+            result = pygame.image.load("img/win2.png")
+        else:
+            result = pygame.image.load("img/draw.png")
+        self.screen.blit(result, [0, 303])        
+        pygame.display.flip()
+     
+    def index_to_position(self, index):                
+        if index == 0: return [0, 0]
+        if index == 1: return [100, 0]
+        if index == 2: return [200, 0]
+        if index == 3: return [0, 100]
+        if index == 4: return [100, 100]
+        if index == 5: return [200, 100]
+        if index == 6: return [0, 200]
+        if index == 7: return [100, 200]
+        if index == 8: return [200, 200]
 
     def position_to_action(self, pos):
         if pos[0] in range(0, 100)      and pos[1] in range(0, 100):    return 0    # top left
