@@ -71,4 +71,6 @@ def play(mode:str):
     input("Press any key to exit")
       
 if __name__ == "__main__":
-    app()
+    #app()
+    g = Game()
+    g.play_gui()

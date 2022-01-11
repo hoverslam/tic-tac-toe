@@ -1,4 +1,4 @@
-import random, itertools, pickle
+import random, itertools, pickle, pygame
 from tqdm import tqdm
 import numpy as np
 
@@ -177,6 +177,14 @@ class Game:
             
         self.show_results(done)
         
+    def play_gui(self):
+        gui = GUI()
+        
+        player = 1
+        
+        while 1:
+            gui.render(self, player)
+        
     def play_ai(self, p1, p2, games, render=True):
         """ Two AIs play against each other for experiment purposes. """
         stats = []
@@ -316,3 +324,61 @@ class QPlayer:
         values = np.pad(values, (0, rem_steps), "edge")
     
         return values
+    
+class GUI:
+    def __init__(self):
+        # Initialize screen
+        pygame.init()
+        pygame.display.set_caption("Tic-Tac-Toe")
+        self.screen = pygame.display.set_mode((300, 450))
+        
+        # Create symbols (X and O)
+        self.p1 = pygame.image.load("img/x.png")
+        self.p2 = pygame.image.load("img/o.png")
+        
+        # Set background image and icon
+        self.bg_image = pygame.image.load("img/background.png")
+        icon = pygame.image.load("img/icon.png")
+        pygame.display.set_icon(icon)
+        
+        self.game_history = []
+      
+    def render(self, game, player):
+        # Check events    
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT: sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN: 
+                action = self.position_to_action(pygame.mouse.get_pos())
+                if (action is not None) and ([player, action] not in self.game_history): 
+                    self.game_history.append([player, action])
+                    state, actions, done = game.step(action, player)
+                    return (state, actions, done)
+        
+        # Update screen    
+        self.screen.blit(self.bg_image, [0, 0])
+        for player, action in self.game_history:
+            coordinates = self.action_to_position(action)
+            self.screen.blit(self.p1, coordinates)            
+        pygame.display.flip() 
+        
+    def action_to_position(self, action):                
+        if action == 0: return [0, 0]
+        if action == 1: return [100, 0]
+        if action == 2: return [200, 0]
+        if action == 3: return [0, 100]
+        if action == 4: return [100, 100]
+        if action == 5: return [200, 100]
+        if action == 6: return [0, 200]
+        if action == 7: return [100, 200]
+        if action == 8: return [200, 200]
+
+    def position_to_action(self, pos):
+        if pos[0] in range(0, 100)      and pos[1] in range(0, 100):    return 0    # top left
+        if pos[0] in range(100, 200)    and pos[1] in range(0, 100):    return 1    # top center
+        if pos[0] in range(200, 300)    and pos[1] in range(0, 100):    return 2    # top right
+        if pos[0] in range(0, 100)      and pos[1] in range(100, 200):  return 3    # middle left
+        if pos[0] in range(100, 200)    and pos[1] in range(100, 200):  return 4    # middle center
+        if pos[0] in range(200, 300)    and pos[1] in range(100, 200):  return 5    # middle right
+        if pos[0] in range(0, 100)      and pos[1] in range(200, 300):  return 6    # bottom left
+        if pos[0] in range(100, 200)    and pos[1] in range(200, 300):  return 7    # bottom center
+        if pos[0] in range(200, 300)    and pos[1] in range(200, 300):  return 8    # bottom right   
