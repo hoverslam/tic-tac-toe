@@ -1,4 +1,4 @@
-import random, itertools, pickle, pygame
+import random, itertools, pickle, sys, pygame
 from tqdm import tqdm
 import numpy as np
 
@@ -184,7 +184,9 @@ class Game:
                     state, actions, done = self.step(action, turn[0])
                     
         if gui:
-            while 1: gui.show_results(state, done)
+            replay = False
+            while not replay: 
+                replay = gui.show_results(state, done)
         else:
             self.show_results(done)           
                 
@@ -367,6 +369,9 @@ class GUI:
         # Check events 
         for event in pygame.event.get():
             if event.type == pygame.QUIT: sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()
+                if pos[1] > 300: return True # replay
                 
         # Screen after final move    
         self.screen.blit(self.bg_image, [0, 0])
@@ -386,6 +391,8 @@ class GUI:
             result = pygame.image.load("img/draw.png")
         self.screen.blit(result, [0, 303])        
         pygame.display.flip()
+        
+        return False # maintain loop
      
     def index_to_position(self, index):                
         if index == 0: return [0, 0]

@@ -66,10 +66,12 @@ def results(games: int):
 
 @app.command()    
 def play(mode: str, gui: Optional[bool] = typer.Argument(False)):
-    g = Game()
-    if gui:
-        g.play_human(mode, True)
+    if gui:        
+        while 1:
+            g = Game() 
+            g.play_human(mode, True)
     else:
+        g = Game()
         g.play_human(mode, False)
         input("Press any key to exit")
       

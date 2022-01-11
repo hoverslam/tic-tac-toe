@@ -26,7 +26,7 @@ Go to the game folder and run:
 
 * `main.py play q-learning` &nbsp;&nbsp;&nbsp;&nbsp; to play a Q-learning opponent
 
-* `main.py play q-learning True` &nbsp;&nbsp;&nbsp;&nbsp; if you set the last parameter to *True* you can play with a GUI
+* `main.py play q-learning True` &nbsp;&nbsp;&nbsp;&nbsp; if you set the last parameter to *True* you can play with a GUI. Replay by clicking on the result.
 
 * `main.py training [n]` &nbsp;&nbsp;&nbsp;&nbsp; to train the AI by playing [n] games against itself
 
