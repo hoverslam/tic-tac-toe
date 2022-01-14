@@ -299,7 +299,7 @@ class QPlayer:
                 future_state = history[future_index][0]
                 future_max_q = self.find_max_q(future_state)[0]
                 current_q = self.table[tuple(state)][action]
-                new_q = (1 - self.learning_rate) * current_q + self.learning_rate * self.discount * future_max_q
+                new_q = (1 - self.learning_rate) * current_q + self.learning_rate * (reward + self.discount * future_max_q)
                 self.table[tuple(state)][action] = new_q
 
     def find_max_q(self, state):
