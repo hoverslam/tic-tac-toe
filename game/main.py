@@ -1,6 +1,3 @@
-import sys
-sys.path.append("game")
-
 from tic_tac_toe import Game, Training
 import typer
 
@@ -11,11 +8,11 @@ def training(games: int):
     print("### TRAINING ###")
     t = Training(0.95, 0.1, [1, 0.1, 0.5])
     t.start(games)
-    t.save_agents("game/", "p1", "p2")
+    t.save_agents("p1", "p2")
     print("Training DONE!")
     print("")
     
-    print("### RESULTS: Percentage of outcomes in 10000 games ###")
+    print("### RESULTS: Outcomes from 10000 games as a percentage ###")
     results = t.results(10000) 
     for res in results:
         print(res[0])

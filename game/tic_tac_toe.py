@@ -141,9 +141,9 @@ class Game:
         ai_turn = 0
         if ai == True:
             ai1 = QPlayer()
-            ai1.load_table("game/", "p1")
+            ai1.load_table("p1")
             ai2 = QPlayer()
-            ai2.load_table("game/", "p2")
+            ai2.load_table("p2")
             ai_turn = random.choice([1, 2])
 
         while not done:
@@ -176,14 +176,14 @@ class QPlayer:
             table[tuple(state)] = [0.0 for x in range(len(action_space))]            
         self.table = table
             
-    def load_table(self, path, name):
+    def load_table(self, name):
         """ Load the Q-table from .pickle """
-        with open("{}{}.pickle".format(path, name), "rb") as handle:
+        with open("{}.pickle".format(name), "rb") as handle:
             self.table = pickle.load(handle)            
     
-    def save_table(self, path, name):
+    def save_table(self, name):
         """ Save the Q-table to .pickle """
-        with open("{}{}.pickle".format(path, name), "wb") as handle:
+        with open("{}.pickle".format(name), "wb") as handle:
             pickle.dump(self.table, handle)
 
     def update_table(self, history, reward, alpha, discount):
@@ -313,10 +313,10 @@ class Training:
         """ Return both agents to use them right away. """
         return (self.p1, self.p2)
     
-    def save_agents(self, path, p1_name, p2_name):
+    def save_agents(self, p1_name, p2_name):
         """ Save the Q-table of both agents. """
-        self.p1.save_table(path, p1_name)
-        self.p2.save_table(path, p2_name)
+        self.p1.save_table(p1_name)
+        self.p2.save_table(p2_name)
 
         
 class GUI:
@@ -327,12 +327,12 @@ class GUI:
         self.screen = pygame.display.set_mode((300, 400))
         
         # Create symbols (X and O)
-        self.p1 = pygame.image.load("game/img/x.png")
-        self.p2 = pygame.image.load("game/img/o.png")
+        self.p1 = pygame.image.load("img/x.png")
+        self.p2 = pygame.image.load("img/o.png")
         
         # Set background image and icon
-        self.bg_image = pygame.image.load("game/img/background.png")
-        icon = pygame.image.load("game/img/icon.png")
+        self.bg_image = pygame.image.load("img/background.png")
+        icon = pygame.image.load("img/icon.png")
         pygame.display.set_icon(icon)
       
     def render(self, state, actions):
@@ -373,11 +373,11 @@ class GUI:
                 
         # Show outcome
         if done == 1:
-            result = pygame.image.load("game/img/win1.png")   
+            result = pygame.image.load("img/win1.png")   
         elif done == 2:
-            result = pygame.image.load("game/img/win2.png")
+            result = pygame.image.load("img/win2.png")
         else:
-            result = pygame.image.load("game/img/draw.png")
+            result = pygame.image.load("img/draw.png")
         self.screen.blit(result, [0, 303])        
         pygame.display.flip()
         
