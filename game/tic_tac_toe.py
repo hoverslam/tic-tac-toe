@@ -3,306 +3,209 @@ from tqdm import tqdm
 import numpy as np
 
 class Board:
+    """ The 'Tic-Tac-Toe' game board with a size of 3x3.  """
     def __init__(self):
-        self.state = [0 for x in range(9)]
+        self.state = np.zeros(9, dtype=int)
         
-    def get_state(self):
-        return self.state
-    
-    def update_state(self, action, player):        
+    def update_state(self, player, action):
+        """ Update the state with a given player-action pair. """       
         self.state[action] = player
         
     def available_positions(self):
-        """ Return the actions a player can take. """
-        p = []
+        """ Return the positions a player can take. """
+        positions = []
         for i, s in enumerate(self.state):
             if s == 0: 
-                p.append(i)            
-        return p
+                positions.append(i)            
+        return positions
     
-    def convert_to_symbols(self, state):
-        symbols = state.copy()
-        for i, s in enumerate(symbols):
-            if s == 0:
-                symbols[i] = "-"
-            elif s == 1:
-                symbols[i] = "X"
-            elif s == 2:
-                symbols[i] = "O"
-        return symbols
-    
+    def player_to_symbol(self, player):
+        """ Convert the player to the known 'tic-tac-toe' symbol. """
+        if player == 1: 
+            return "X"
+        elif player == 0:
+            return "O"
+
     def show(self):
-        """ Displays the board with the known tic-tac-toe symbols in the console. """
-        symbols = self.convert_to_symbols(self.state)
-        print("\n")
-        print("       |     |")
-        print("    {}  |  {}  |  {}".format(symbols[0], symbols[1], symbols[2]))
-        print("  _____|_____|_____")    
-        print("       |     |")
-        print("    {}  |  {}  |  {}".format(symbols[3], symbols[4], symbols[5]))
-        print("  _____|_____|_____")    
-        print("       |     |")    
-        print("    {}  |  {}  |  {}".format(symbols[6], symbols[7], symbols[8]))
-        print("       |     |")
-        print("\n")
-        
+        """ Print the board in the console. """
+        print("--------------------------------------------")
+        for row in self.state.reshape((3, 3)):            
+            print(" {}".format(row))
+        print("")
+        print(" Select action: {}".format(self.available_positions()))            
+        print("--------------------------------------------")
+ 
+       
 class Game:
     def __init__(self):
+        pass
+        
+    def reset(self):
+        """ Reset the environment to start a new game. """
         self.b = Board()
         self.round = 1
-        
-    def step(self, action, player):
-        """ Update the board with the action taken by a player and return the new state, 
-        the available actions for the next player and the outcome of the move. """
-        self.b.update_state(action, player)
-        self.round = self.round + 1
-        state = self.b.get_state()
-        actions = self.b.available_positions()
-        done = self.state_outcome(state)     
-        
-        return (state, actions, done)
+          
+        return (self.b.state, (0, 0), False)    # state, reward and done
     
-    def current_turn(self):
+    def current_player(self):
         """ Player 1 moves on uneven rounds and player 2 on even. """
         if self.round % 2 == 0:
-            return (2, "O", "red")
+            return 2
         else:
-            return (1, "X", "green")
+            return 1
         
-    def state_outcome(self, state):
-        """ Determines the outcome of the given board layout: 
-        -1 = not finished, 0 = draw, 1 = player 1 wins, 2 = player 2 wins """
-        result = -1
+    def state_space(self):
+        """ Return all possible states in the game. """
+        return list(itertools.product([0, 1, 2], repeat = 9))
+    
+    def action_space(self):
+        """ Return all actions a player can make. """
+        return np.arange(9)
+    
+    def actions(self):
+        return self.b.available_positions()
+        
+    def check_outcome(self, state):
+        """ Determine the outcome of a given board layout: 
+            -1 = not finished, 0 = draw, 1 = player 1 wins, 2 = player 2 wins """        
+        outcome = -1
         # Check rows
         if state[0] == state[1] == state[2] and state[0] != 0:
-            result = state[0]
+            outcome = state[0]
         elif state[3] == state[4] == state[5] and state[3] != 0:
-            result = state[3]
+            outcome = state[3]
         elif state[6] == state[7] == state[8] and state[6] != 0:
-            result = state[6]
+            outcome = state[6]
         # Check columns
         elif state[0] == state[3] == state[6] and state[0] != 0:
-            result = state[0]
+            outcome = state[0]
         elif state[1] == state[4] == state[7] and state[1] != 0:
-            result = state[1]
+            outcome = state[1]
         elif state[2] == state[5] == state[8] and state[2] != 0:
-            result = state[2]
+            outcome = state[2]
         # Check diagonals
         elif state[0] == state[4] == state[8] and state[0] != 0:
-            result = state[0]
+            outcome = state[0]
         elif state[2] == state[4] == state[6] and state[2] != 0:
-            result = state[2]
+            outcome = state[2]
         # Check for draw
         elif len(self.b.available_positions()) == 0:
-            result = 0
+            outcome = 0
 
-        return result
-    
-    def get_rewards(self, done):
-        """ Returns the rewards for both players. """
-        if done == 1:
-            rewards = (1, 0)
-        elif done == 2:
-            rewards = (0, 1)
-        else:
+        return outcome
+
+    def give_rewards(self, outcome):
+        """ Return the rewards for both players. """
+        if outcome == 1:
+            rewards = (1.0, 0.0)
+        elif outcome == 2:
+            rewards = (0.0, 1.0)
+        elif outcome == 0: 
             rewards = (0.5, 0.5)
+        else:
+            rewards = (0.0, 0.0)
             
         return rewards
     
-    def show_results(self, result):
-        print("")           
-        if result == 0:
-            print("#######################")    
-            print("  !!! IT'S A DRAW !!!")
-            print("#######################")
-        else:             
-            print("###########################")    
-            print("  !!! PLAYER -{}- WINS !!!".format(result))
-            print("###########################")
-            
-        self.b.show()
-               
-    def check_user_input(self, input):
-        """ Check if the user inputs are feasible and convert numpad inputs to the state indices """
-        action = None        
-        if input == 7 : action = 0
-        elif input == 8 : action = 1
-        elif input == 9 : action = 2
-        elif input == 4 : action = 3
-        elif input == 5 : action = 4
-        elif input == 6 : action = 5
-        elif input == 1 : action = 6
-        elif input == 2 : action = 7
-        elif input == 3 : action = 8
-        
-        return action
-    
-    def play_human(self, mode, gui=False):
-        """ Human plays against another human or an AI. Modes: pvp, random, q-learning """     
-        actions = self.b.available_positions()
-        state = self.b.get_state() 
-        done = -1
-        ai_turn = random.choice([1, 2])        
-        if gui: gui = GUI()
-        
-        if mode == "pvp":
-            ai = False
-        elif mode == "random":
-            ai = True
-            ai1 = RandomPlayer()
-            ai2 = RandomPlayer()
-        elif mode == "q-learning":
-            ai = True
-            ai1 = QPlayer(0, 0, 0)
-            ai1.load_table("p1")
-            ai2 = QPlayer(0, 0, 0)
-            ai2.load_table("p2")     
-        
-        while done == -1:
-            turn = self.current_turn()
-            
-            if not gui:
-                print("") 
-                print("### ROUND {}: Player -{}- ###".format(self.round, turn[1]))
-                self.b.show()
-                
-            if ai and turn[0] == ai_turn:
-                if turn[0] == 1:
-                    action = ai1.select_action(actions, state, 0)
-                else:
-                    action = ai2.select_action(actions, state, 0)
-                state, actions, done = self.step(action, turn[0])                
-                if not gui: print("  Select position: AI -> {}".format(action))
-            else: 
-                if gui:
-                    action = gui.render(state, actions)
-                    if action is not None:            
-                        state, actions, done = self.step(action, turn[0])
-                else:
-                    action = int(input("  Select position: "))
-                    action = self.check_user_input(action)
-                    state, actions, done = self.step(action, turn[0])
-                    
-        if gui:
-            replay = False
-            while not replay: 
-                replay = gui.show_results(state, done)
+    def get_winner(self, reward):
+        """ Return winner from reward 
+            0 = draw, 1 = win player 1, 2 = win player 2 """        
+        if reward[0] == 1:
+            return 1
+        elif reward[1] == 1:
+            return 2
         else:
-            self.show_results(done)           
-                
-    def play_ai(self, p1, p2, games, render=True):
-        """ Two AIs play against each other for experiment purposes. """
-        stats = []
-              
-        for g in tqdm(range(games), disable=not render):      
-            actions = self.b.available_positions()
-            state = self.b.get_state()
-            done = -1
-           
-            while done == -1:
-                turn = self.current_turn()            
-                if turn[0] == 1:
-                    action = p1.select_action(actions, state, 0)                  
-                else: 
-                    action = p2.select_action(actions, state, 0)
-                
-                state, actions, done = self.step(action, turn[0])                   
+            return 0
 
-            stats.append(done)
-            self.b = Board()
-            self.round = 1
-
-        return stats
-
-    def train_ai(self, games, render=True):
-        """ Two AIs play against each other to train them. """
-        p1 = QPlayer(0.95, 0.2, [1.0, 0.01, 0.5])
-        p1_epsilons = p1.decay_schedule(games)
-        p2 = QPlayer(0.95, 0.2, [1.0, 0.01, 0.5])
-        p2_epsilons = p2.decay_schedule(games)
-        
-        for g in tqdm(range(games), disable=not render):
-            p1_history = []       
-            p2_history = []       
-            actions = self.b.available_positions()
-            state = self.b.get_state()
-            done = -1
-           
-            while done == -1:
-                turn = self.current_turn()  
-                if turn[0] == 1:
-                    action = p1.select_action(actions, state, p1_epsilons[g])
-                    p1_history.append([state[:], action])                    
-                else: 
-                    action = p2.select_action(actions, state, p2_epsilons[g])
-                    p2_history.append([state[:], action]) 
-                
-                state, actions, done = self.step(action, turn[0])                   
+    def step(self, action):
+        """ Given an action update the game and return the new state, the rewards and
+            the outcome of the current board layout. """
+        player = self.current_player()
+        self.b.update_state(player, action)
+        self.round += 1
+        state = self.b.state
+        result = self.check_outcome(state)
+        reward = self.give_rewards(result)
+        if result == -1: 
+            done = False
+        else:
+            done = True
             
-            p1_reward = self.get_rewards(done)[0]
-            p1.update_table(p1_history, p1_reward)
-            p2_reward = self.get_rewards(done)[1]
-            p2.update_table(p2_history, p2_reward)
-
-            self.b = Board()
-            self.round = 1
-        
-        p1.save_table("p1")
-        p2.save_table("p2")
-        
-        return (p1, p2)
-              
-class RandomPlayer:
-    """ A simple 'AI' that selects actions randomly. """
-    def __init__(self):
-        pass
-        
-    def select_action(self, actions, state, epsilon):        
-        return random.choice(actions)
-
-    def update_table(self, history, reward):
-        pass
+        return (state, reward, done)
     
+    def play(self, ai):
+        """ Play a game against another human player or an AI player. """
+        gui = GUI()
+        state, reward, done = self.reset() 
+
+        ai_turn = 0
+        if ai == True:
+            ai1 = QPlayer()
+            ai1.load_table("game/", "p1")
+            ai2 = QPlayer()
+            ai2.load_table("game/", "p2")
+            ai_turn = random.choice([1, 2])
+
+        while not done:
+            if (ai_turn == self.current_player()) and (ai_turn == 1):
+                action = ai1.select_action(state, self.actions(), 0)
+                state, reward, done = self.step(action)                
+            elif(ai_turn == self.current_player()) and (ai_turn == 2):
+                action = ai2.select_action(state, self.actions(), 0)
+                state, reward, done = self.step(action)
+            else:
+                action = gui.render(state, self.actions())
+                if action is not None:
+                    state, reward, done = self.step(action)
+    
+        winner = self.get_winner(reward)        
+        replay = False
+        while not replay: 
+            replay = gui.show_results(state, winner)
+
+     
 class QPlayer:
     """ A RL agent that utilizes Q-learning. """
-    def __init__(self, discount=None, learning_rate=None, epsilon=None):
-        self.table = self.create_table()
-        self.discount = discount
-        self.learning_rate = learning_rate        
-        self.epsilon = epsilon
+    def __init__(self):
+        self.table = None
         
-    def create_table(self):
+    def create_table(self, state_space, action_space):
+        """ Initialize the Q-table with zeros """
         table = {}
-        keys = list(itertools.product([0, 1, 2], repeat = 9))
-        for k in keys:
-            table[k] = [0 for x in range(9)]
+        for state in state_space:
+            table[tuple(state)] = [0.0 for x in range(len(action_space))]            
+        self.table = table
             
-        return table
-            
-    def load_table(self, filename):
-        with open("{}.pickle".format(filename), "rb") as handle:
+    def load_table(self, path, name):
+        """ Load the Q-table from .pickle """
+        with open("{}{}.pickle".format(path, name), "rb") as handle:
             self.table = pickle.load(handle)            
     
-    def save_table(self, filename):
-        with open("{}.pickle".format(filename), "wb") as handle:
+    def save_table(self, path, name):
+        """ Save the Q-table to .pickle """
+        with open("{}{}.pickle".format(path, name), "wb") as handle:
             pickle.dump(self.table, handle)
 
-    def update_table(self, history, reward):
+    def update_table(self, history, reward, alpha, discount):
         """ Sutton (2020) Reinforcement Learning, Chapter 6.5: Q-learning """
-        history.reverse()
-        
-        for i, (state, action) in enumerate(history):
-            if i == 0:
-                self.table[tuple(state)][action] = reward
+        """ https://en.wikipedia.org/wiki/Q-learning """
+        for i in range(len(history)):
+            old_state, action = history[i]
+            if i == len(history)-1:
+                # The last state has no future q-value
+                old_q = self.table[tuple(old_state)][action]        
+                new_q = (1 - alpha) * old_q + alpha * reward
             else:
-                future_index = i - 1
-                future_state = history[future_index][0]
-                future_max_q = self.find_max_q(future_state)[0]
-                current_q = self.table[tuple(state)][action]
-                new_q = (1 - self.learning_rate) * current_q + self.learning_rate * (reward + self.discount * future_max_q)
-                self.table[tuple(state)][action] = new_q
+                # All other states discount future q-values, but get no rewards
+                new_state, _ = history[i+1] 
+                old_q = self.table[tuple(old_state)][action]        
+                future_max_q = self.maxQ(new_state)[0]
+                new_q = (1 - alpha) * old_q + alpha * discount * future_max_q
+             
+            self.table[tuple(old_state)][action] = new_q
 
-    def find_max_q(self, state):
+    def maxQ(self, state):
+        """ Return the maximum q-value and its action from a given state """
         actions = self.table[tuple(state)]
         action = 0
         max_q = -10e10
@@ -313,23 +216,109 @@ class QPlayer:
             
         return (max_q, action)
 
-    def select_action(self, actions, state, epsilon):          
+    def select_action(self, state, actions, epsilon):
+        """ Select action with an epsilon-greedy policy """          
         if random.random() < epsilon:
             return random.choice(actions)
         else:
-            return self.find_max_q(state)[1] 
+            return self.maxQ(state)[1]
         
-    def decay_schedule(self, max_steps, log_start=-2, log_base=10):
-        """ Morales (2020) Grokking Deep Reinforcement Learning """
-        decay_steps = int(max_steps * self.epsilon[2])
+
+class Training:
+    """ Train two agents by playing against each other. """
+    def __init__(self, discount, learning_rate, epsilon):
+        self.discount = discount
+        self.learning_rate = learning_rate
+        self.epsilon = epsilon
+        
+        self.p1 = QPlayer()
+        self.p1.create_table(Game().state_space(), Game().action_space())
+        self.p2 = QPlayer()
+        self.p2.create_table(Game().state_space(), Game().action_space())
+        
+    def decay_schedule(self, init_value, min_value, decay_ratio, max_steps, log_start=-2, log_base=10):
+        """ Compute decaying values as an inverse log curve. """ 
+        """ see: Morales (2020) Deep Reinforcement Learning """
+        decay_steps = int(max_steps * decay_ratio)
         rem_steps = max_steps - decay_steps
         values = np.logspace(log_start, 0, decay_steps, base=log_base, endpoint=True)[::-1]
         values = (values - values.min()) / (values.max() - values.min())
-        values = (self.epsilon[0] - self.epsilon[1]) * values + self.epsilon[1]
+        values = (init_value - min_value) * values + min_value
         values = np.pad(values, (0, rem_steps), "edge")
     
-        return values
+        return values    
+        
+    def start(self, episodes, render=True):
+        """ Start the training. """
+        epsilons = self.decay_schedule(self.epsilon[0], self.epsilon[1], self.epsilon[2], episodes)
+
+        g = Game()
+        state, reward, done = g.reset()
+        
+        for episode in tqdm(range(episodes), disable=(not render)):  
+            p1_history = []
+            p2_history = []
+            
+            while not done:
+                if g.current_player() == 1:
+                    action = self.p1.select_action(state, g.actions(), epsilons[episode])
+                    p1_history.append([np.copy(state), action])
+                else:
+                    action = self.p2.select_action(state, g.actions(), epsilons[episode])
+                    p2_history.append([np.copy(state), action])
+
+                state, reward, done = g.step(action)
+            
+            # Update Q-table
+            self.p1.update_table(p1_history, reward[0], self.learning_rate, self.discount)            
+            self.p2.update_table(p2_history, reward[1], self.learning_rate, self.discount)            
+            state, reward, done = g.reset()
+              
     
+    def results(self, games, render=True):
+        """ Measure performance by playing against different types of opponents. """
+        g = Game()
+        state, reward, done = g.reset()
+        results = []                    
+        setup = [
+            [0, 0, "Q-Player vs. Q-Player"],
+            [0, 1, "Q-Player vs. Random"],
+            [1, 0, "Random vs. Q-Player"]
+        ]
+        
+        for s in setup:
+            stats = []                     
+            for game in tqdm(range(games), disable=(not render)):
+                while not done:
+                    if g.current_player() == 1:
+                        action = self.p1.select_action(state, g.actions(), s[0])
+                    else:
+                        action = self.p2.select_action(state, g.actions(), s[1])
+                    
+                    state, reward, done = g.step(action)
+                
+                if reward[0] == 1:
+                    stats.append(1)     # Player 1 won
+                elif reward[1] == 1:
+                    stats.append(2)     # Player 2 won
+                else:
+                    stats.append(0)     # Draw
+                state, reward, done = g.reset()
+            
+            results.append((s[2], stats))
+            
+        return results
+
+    def get_agents(self):
+        """ Return both agents to use them right away. """
+        return (self.p1, self.p2)
+    
+    def save_agents(self, path, p1_name, p2_name):
+        """ Save the Q-table of both agents. """
+        self.p1.save_table(path, p1_name)
+        self.p2.save_table(path, p2_name)
+
+        
 class GUI:
     def __init__(self):
         # Initialize screen
@@ -338,12 +327,12 @@ class GUI:
         self.screen = pygame.display.set_mode((300, 400))
         
         # Create symbols (X and O)
-        self.p1 = pygame.image.load("img/x.png")
-        self.p2 = pygame.image.load("img/o.png")
+        self.p1 = pygame.image.load("game/img/x.png")
+        self.p2 = pygame.image.load("game/img/o.png")
         
         # Set background image and icon
-        self.bg_image = pygame.image.load("img/background.png")
-        icon = pygame.image.load("img/icon.png")
+        self.bg_image = pygame.image.load("game/img/background.png")
+        icon = pygame.image.load("game/img/icon.png")
         pygame.display.set_icon(icon)
       
     def render(self, state, actions):
@@ -371,7 +360,7 @@ class GUI:
             if event.type == pygame.QUIT: sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
-                if pos[1] > 300: return True # replay
+                if pos[1] > 300: return True    # Replay button
                 
         # Screen after final move    
         self.screen.blit(self.bg_image, [0, 0])
@@ -384,11 +373,11 @@ class GUI:
                 
         # Show outcome
         if done == 1:
-            result = pygame.image.load("img/win1.png")   
+            result = pygame.image.load("game/img/win1.png")   
         elif done == 2:
-            result = pygame.image.load("img/win2.png")
+            result = pygame.image.load("game/img/win2.png")
         else:
-            result = pygame.image.load("img/draw.png")
+            result = pygame.image.load("game/img/draw.png")
         self.screen.blit(result, [0, 303])        
         pygame.display.flip()
         
