@@ -22,8 +22,8 @@ Install them with &nbsp;&nbsp;&nbsp;&nbsp; `pip install -r requirements.txt`
 
 From the game folder run:
 
-* `main.py play pvp` &nbsp;&nbsp;&nbsp;&nbsp; to play another human player 
+* `main.py play pvp` &nbsp;&nbsp;&nbsp;&nbsp; to play against another human player 
 
-* `main.py play ai` &nbsp;&nbsp;&nbsp;&nbsp; to play an AI opponent
+* `main.py play ai` &nbsp;&nbsp;&nbsp;&nbsp; to play against an AI opponent
 
 * `main.py training [n]` &nbsp;&nbsp;&nbsp;&nbsp; to train the AI by playing [n] games against itself
