@@ -27,3 +27,5 @@ From the game folder run:
 * `main.py play ai` &nbsp;&nbsp;&nbsp;&nbsp; to play against an AI opponent
 
 * `main.py training [n]` &nbsp;&nbsp;&nbsp;&nbsp; to train the AI by playing [n] games against itself
+
+Start a new game by clicking on the result.
