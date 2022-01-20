@@ -189,15 +189,16 @@ class QPlayer:
     def update_table(self, history, reward, alpha, discount):
         """ Sutton (2020) Reinforcement Learning, Chapter 6.5: Q-learning """
         """ https://en.wikipedia.org/wiki/Q-learning """
+        history.reverse()
         for i in range(len(history)):
             old_state, action = history[i]
-            if i == len(history)-1:
+            if i == 0:
                 # The last state has no future q-value
                 old_q = self.table[tuple(old_state)][action]        
                 new_q = (1 - alpha) * old_q + alpha * reward
             else:
                 # All other states discount future q-values, but get no rewards
-                new_state, _ = history[i+1] 
+                new_state, _ = history[i-1] 
                 old_q = self.table[tuple(old_state)][action]        
                 future_max_q = self.maxQ(new_state)[0]
                 new_q = (1 - alpha) * old_q + alpha * discount * future_max_q
