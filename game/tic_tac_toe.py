@@ -248,12 +248,14 @@ class Training:
     
         return values    
         
-    def start(self, episodes, render=True):
+    def start(self, episodes, render=True, history=False):
         """ Start the training. """
         epsilons = self.decay_schedule(self.epsilon[0], self.epsilon[1], self.epsilon[2], episodes)
 
         g = Game()
         state, reward, done = g.reset()
+        
+        state_history = []
         
         for episode in tqdm(range(episodes), disable=(not render)):  
             p1_history = []
@@ -273,8 +275,16 @@ class Training:
             self.p1.update_table(p1_history, reward[0], self.learning_rate, self.discount)            
             self.p2.update_table(p2_history, reward[1], self.learning_rate, self.discount)            
             state, reward, done = g.reset()
-              
-    
+            
+            # Save history for a selected state
+            if history != False:
+                state_p1 = self.p1.table[tuple(history)].copy()
+                state_p2 = self.p2.table[tuple(history)].copy()
+                state_history.append([episode+1, state_p1, state_p2])
+                
+        if history != False: 
+            return state_history
+        
     def results(self, games, render=True):
         """ Measure performance by playing against different types of opponents. """
         g = Game()
