@@ -6,6 +6,8 @@ An implementation of the familiar game "Tic-Tac-Toe". You can play against anoth
 
 <https://en.wikipedia.org/wiki/Q-learning>
 
+<img src="screenshot.png?raw=true" height="300">
+
 ## Prerequisite
 
 * Python v3.10.1
