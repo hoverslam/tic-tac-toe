@@ -1,6 +1,6 @@
 # Tic-Tac-Toe
 
-An implementation of the familiar game "Tic-Tac-Toe". You can play against another player or an Reinforcement Learning (RL) agent that was trained in 500000 games.
+An implementation of the familiar game "Tic-Tac-Toe". You can play against another player or a Reinforcement Learning (RL) agent.
 
 <https://en.wikipedia.org/wiki/Tic-tac-toe>
 
